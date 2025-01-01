@@ -2,8 +2,21 @@ import os
 
 import requests
 import dotenv
+from flask import Flask, render_template, url_for
 
 import search
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
 # dotenv.load_dotenv()
 # base_url = 'https://api.mangadex.org'
 
@@ -40,10 +53,3 @@ import search
 # titles = [el['attributes']['title']['en'] for el in resp_dict['data']]
 
 # print(titles, flush=True)
-
-if __name__ == '__main__':
-    res = search.search('Bleach', 4, included_tags=['Action'], 
-                  excluded_tags=['Romance'], order={ 'rating' : 'desc' }, 
-                  demographic=[], status=[], rating=[])
-    for mgn in res:
-        print(mgn)

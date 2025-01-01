@@ -41,7 +41,3 @@ def search(title : str, limit : int, **args) -> list[Manga]:
 
     response = requests.get(base_url + endpoint, params=params)
     return [ Manga(m) for m in response.json()['data'] ]
-
-def chapters(id : str) -> list[Any]:
-    res = requests.get(base_url + f'/manga/{id}/feed')
-    return res.json()
