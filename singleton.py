@@ -4,9 +4,9 @@ class Chapter:
     def __init__(self, info : dict) -> None:
         self.id : str = info['id']
         self.title : str = info['attributes']['title']
-        self.volume : float = float(info['attributes']['volume'])
-        self.number : float = float(info['attributes']['chapter'])
-        self.pages : int = int(info['attributes']['pages'])
+        self.volume : float = info['attributes']['volume']
+        self.number : float = info['attributes']['chapter']
+        self.pages : int = info['attributes']['pages']
         self.release_date : str = info['attributes']['publishAt']
         self.language : str = info['attributes']['translatedLanguage']
 
@@ -33,11 +33,11 @@ class Manga:
         self.description : str = info['attributes']['description']['en']
         self.tags : list[str] = [ tag['attributes']['name']['en'] for tag in info['attributes']['tags'] ]
         self.demographic : str = info['attributes']['publicationDemographic']
-        self.status : str = info['attributes']['completed']
+        # self.status : str = info['attributes']['completed']
         self.cover_art : str = [ el['id'] for el in info['relationships'] if el['type'] == 'cover_art' ][0]
-        self.last_chapter : float = float(info['attributes']['lastChapter'])
-        self.last_volume : float = float(info['attributes']['lastVolume'])
-        self.chapters : list[str] = self.load_chapters()
+        self.last_chapter : float = info['attributes']['lastChapter']
+        self.last_volume : float = info['attributes']['lastVolume']
+        self.chapters : list[Chapter] = self.load_chapters()
 
     def __repr__(self) -> str:
         return f'Title: {self.title}\nID: {self.id} \
@@ -50,7 +50,7 @@ class Manga:
     def __ne__(self, other) -> bool:
         return self.id != other.id
     
-    def load_chapters(self) -> list[str]:
+    def load_chapters(self) -> list[Chapter]:
         res = requests.get(f'https://api.mangadex.org/manga/{self.id}/feed')
         return sorted(filter(lambda ch: ch.language == 'en', 
                        [ Chapter(ch) for ch in res.json()['data'] ]), 

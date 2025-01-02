@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="chapter-title">
+    <h3>{{ chapter.title }}</h3>
+</div>
+<div class="image-container">
+    {% for img in chapter.images() %}
+    <div class="image-wrapper">
+        <img src="{{ img }}" alt="Manga Image" style="display: block; width: 100%;">
+    </div>
+    {% endfor %}
+</div>
+<div class="chapter-controls">
+    <button type="button" onclick="">Prev</button>
+    <button type="button" onclick="">Next</button>
+</div>
+{% endblock %}

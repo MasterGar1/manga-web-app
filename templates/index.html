@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<h1>Manga Scraper</h1>
 {% endblock %}
 
 {% block body %}
-
-
+<h1>Home</h1>
+<div class="container">
+    <!-- <a href="{{ url_for('search.search_home') }}">Search</a> -->
+    <a href="{{ url_for('library') }}">Library</a>
+    <a href="{{ url_for('login') }}">Login</a>
+</div>
 {% endblock %}

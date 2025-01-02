@@ -1,6 +1,7 @@
 from typing import Any
 
 import requests
+from flask import render_template, Blueprint, request
 
 from singleton import Manga
 
@@ -8,7 +9,29 @@ base_url = 'https://api.mangadex.org'
 
 endpoint = '/manga'
 
-def search(title : str, limit : int, **args) -> list[Manga]:
+bp = Blueprint('searches', __name__)
+
+demographics : list[str] = ['shounen', 'shoujo', 'josei', 'seinen']
+statuses : list[str] = ['ongoing', 'completed', 'haitus', 'cancelled']
+ordering : list[str] = ['title', 'year', 'createdAt', 'updatedAt', 'latestUploadedChapter', 'relevance']
+genres : list[str] = ['Action', 'Adventure', 'Boys\' Love', 
+                      'Comedy', 'Crime', 'Drama', 'Fantasy', 
+                      'Girls\' Love', 'Historical', 'Horror', 
+                      'Isekai', 'Magical Girls', 'Mecha', 'Medical', 
+                      'Mystery', 'Philosophical', 'Psychological', 'Romance', 
+                      'Sci-Fi', 'Slice of Life', 'Sports', 'Superhero', 
+                      'Thriller', 'Tragedy', 'Wuxia']
+
+@bp.route('/')
+def search_home():
+    return render_template('search.html', title='Search', genres=genres, 
+                           orders=ordering, status=statuses, demogr=demographics)
+
+@bp.route('/results')
+def search_results():
+    return render_template('results.html')
+
+def search_manga(title : str, limit : int, **args) -> list[Manga]:
     tags : dict = requests.get(f'{base_url}/manga/tag').json()
     if args['included_tags'] == []:
         included_ids : list[str] = [ tag['id']
@@ -32,9 +55,8 @@ def search(title : str, limit : int, **args) -> list[Manga]:
             'limit' : limit,
             'includedTags[]' : included_ids,
             'excludedTags[]' : excluded_ids,
-            'publicationDemographic[]' : args['demographic'],
             'status[]' : args['status'],
-            'contentRating' : args['rating']
+            'publicationDemographic[]' : args['demographic'],
         },
         **order_fix
     }

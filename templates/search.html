@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Search</title>
+{% endblock %}
+
+{% block body %}
+<h1>Search</h1>
+<div class="container">
+    <form action="{{ url_for('search') }}" method="get">
+        <div>
+            <label for="search">Search:</label>
+            <input type="text" id="search" name="search">
+        </div>
+        <div>
+            <label>Genres:</label>
+            <button type="button" onclick="document.getElementById('genre-popup').style.display='block'">Select Genres</button>
+        </div>
+        <div>
+            <label>Order by:</label>
+            <input type="radio" id="asc" name="order" value="asc" checked>
+            <label for="asc">Ascending</label>
+            <input type="radio" id="desc" name="order" value="desc">
+            <label for="desc">Descending</label>
+        </div>
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+</div>
+
+<div id="genre-popup" class="popup">
+    <div class="popup-content">
+        <h2>Select Genres</h2>
+        {% for item in genres %}
+        <div>
+            <input type="checkbox" id="{{item}}" name="genres" value="{{ item }}">
+            <label for="{{ item }}">{{ item }}</label>
+        </div>
+        {% endfor %}
+        <button type="button" onclick="document.getElementById('genre-popup').style.display='none'">Done</button>
+    </div>
+</div>
+{% endblock %}
