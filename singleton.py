@@ -29,20 +29,30 @@ class Chapter:
 class Manga:
     def __init__(self, info : dict) -> None:
         self.id : str = info['id']
-        self.title : str = info['attributes']['title']['en']
-        self.description : str = info['attributes']['description']['en']
+        self.title : str = info['attributes']['title'].get('en', '.')
+        self.description : str = info['attributes']['description'].get('en', '.')
         self.tags : list[str] = [ tag['attributes']['name']['en'] for tag in info['attributes']['tags'] ]
         self.demographic : str = info['attributes']['publicationDemographic']
-        # self.status : str = info['attributes']['completed']
         self.cover_art : str = [ el['id'] for el in info['relationships'] if el['type'] == 'cover_art' ][0]
         self.last_chapter : float = info['attributes']['lastChapter']
         self.last_volume : float = info['attributes']['lastVolume']
-        self.chapters : list[Chapter] = self.load_chapters()
 
     def __repr__(self) -> str:
         return f'Title: {self.title}\nID: {self.id} \
                         \nDescription: {self.description} \
                         \nTags: {', '.join(self.tags)}\n'
+    
+    def to_dict(self) -> dict[str, str]:
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'tags': str(self.tags),
+            'demographic' : self.demographic,
+            'cover_art' : self.cover_art,
+            'last_chapter' : self.last_chapter,
+            'last_volume' : self.last_volume,
+        }
     
     def __eq__(self, other) -> bool:
         return self.id == other.id
@@ -50,14 +60,14 @@ class Manga:
     def __ne__(self, other) -> bool:
         return self.id != other.id
     
-    def load_chapters(self) -> list[Chapter]:
+    def chapters(self) -> list[Chapter]:
         res = requests.get(f'https://api.mangadex.org/manga/{self.id}/feed')
         return sorted(filter(lambda ch: ch.language == 'en', 
                        [ Chapter(ch) for ch in res.json()['data'] ]), 
                              key=lambda ch: ch.number)
 
     def cover(self) -> str:
-        return f'https://uploads.mangadex.org/covers/{self.id}/{self.cover_art}'
+        return f'https://uploads.mangadex.org/covers/{self.id}/{self.cover_art}.png.256.jpg'
         
     
 class Book(Manga):

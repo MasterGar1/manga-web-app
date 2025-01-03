@@ -1,44 +1,112 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Search</title>
 {% endblock %}
 
 {% block body %}
-<h1>Search</h1>
+<h1>Find Manga</h1>
 <div class="container">
-    <form action="{{ url_for('search') }}" method="get">
+    <form action="{{ url_for('search.search_home') }}" method="POST">
         <div>
             <label for="search">Search:</label>
-            <input type="text" id="search" name="search">
+            <input type="text" id="search" name="search" class="wide-search">
+        </div>
+        <div class="form-layout">
+            <div class="genre-section">
+                <label>Genres:</label>
+                <div class="genre-grid">
+                    {% for item in genres %}
+                    <button type="button" class="genre-button" id="genre-{{ item }}" onclick="toggle_genre('{{ item }}')">{{ item }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="order-section">
+                <label>Order by:</label>
+                <div class="order-grid">
+                    {% for item in orders %}
+                    {% if item == 'title' %}
+                        <input type="radio" id="order-{{ item }}" name="dir" value="{{ item }}" checked>
+                    {% else %}
+                        <input type="radio" id="order-{{ item }}" name="dir" value="{{ item }}">
+                    {% endif %}
+                    <label for="order-{{ item }}">{{ word_split(item) }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="order-direction">
+                <label>Direction:</label>
+                <input type="radio" id="asc" name="order" value="asc" checked>
+                <label for="asc">Ascending</label>
+                <input type="radio" id="desc" name="order" value="desc">
+                <label for="desc">Descending</label>
+            </div>
+            <div class="demo-section">
+                <label>Demographic:</label>
+                <div class="demo-grid">
+                    {% for item in demogr %}
+                    {% if item == 'shounen' %}
+                        <input type="radio" id="demo-{{ item }}" name="demo" value="{{ item }}" checked>
+                    {% else %}
+                        <input type="radio" id="demo-{{ item }}" name="demo" value="{{ item }}">
+                    {% endif %}
+                    <label for="demo-{{ item }}">{{ word_split(item) }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="status-section">
+                <label>Status:</label>
+                <div class="status-grid">
+                    {% for item in status %}
+                    {% if item == 'ongoing' %}
+                        <input type="radio" id="status-{{ item }}" name="status" value="{{ item }}" checked>
+                    {% else %}
+                        <input type="radio" id="status-{{ item }}" name="status" value="{{ item }}">
+                    {% endif %}
+                    <label for="status-{{ item }}">{{ word_split(item) }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="limit-section">
+                <label for="limit">Limit:</label>
+                <input type="number" id="limit" name="limit" min="1" max="100" value="10">
+            </div>
         </div>
         <div>
-            <label>Genres:</label>
-            <button type="button" onclick="document.getElementById('genre-popup').style.display='block'">Select Genres</button>
-        </div>
-        <div>
-            <label>Order by:</label>
-            <input type="radio" id="asc" name="order" value="asc" checked>
-            <label for="asc">Ascending</label>
-            <input type="radio" id="desc" name="order" value="desc">
-            <label for="desc">Descending</label>
-        </div>
-        <div>
-            <button type="submit">Search</button>
+            <button type="button" onclick="apply_search()">Search</button>
         </div>
     </form>
 </div>
 
-<div id="genre-popup" class="popup">
-    <div class="popup-content">
-        <h2>Select Genres</h2>
-        {% for item in genres %}
-        <div>
-            <input type="checkbox" id="{{item}}" name="genres" value="{{ item }}">
-            <label for="{{ item }}">{{ item }}</label>
-        </div>
-        {% endfor %}
-        <button type="button" onclick="document.getElementById('genre-popup').style.display='none'">Done</button>
-    </div>
-</div>
+<script>
+    function toggle_genre(genre) {
+        const button = document.getElementById('genre-' + genre);
+        if (button.classList.contains('selected')) {
+            button.classList.remove('selected');
+            button.classList.add('removed');
+        } else if (button.classList.contains('removed')) {
+            button.classList.remove('removed');
+        } else {
+            button.classList.add('selected');
+        }
+    }
+
+    function get_query_params() {
+        const search_input = document.getElementById('search').value;
+        const included_genres = Array.from(document.querySelectorAll('.genre-button.selected')).map(btn => btn.innerText).join(',');
+        const excluded_genres = Array.from(document.querySelectorAll('.genre-button.removed')).map(btn => btn.innerText).join(',');
+        const order_by = document.querySelector('input[name="dir"]:checked').value;
+        const sorting_direction = document.querySelector('input[name="order"]:checked').value;
+        const demographic = document.querySelector('input[name="demo"]:checked').value;
+        const status = document.querySelector('input[name="status"]:checked').value;
+        const limit = document.getElementById('limit').value;
+
+        return `${search_input}+${included_genres}+${excluded_genres}+${order_by}+${sorting_direction}+${demographic}+${status}+${limit}`;
+    }
+
+    function apply_search() {
+        const query_params = get_query_params();
+        const search_url = `{{ url_for('search.search_results', query='') }}${query_params}`;
+        window.location.href = search_url;
+    }
+</script>
 {% endblock %}

@@ -5,4 +5,16 @@
 {% endblock %}
 
 {% block body %}
+<h1>{{ title }}</h1>
+<div class="manga-grid">
+    {% for manga in result %}
+    <div class="manga-item">
+        <a href="{{ url_for('user.manga_info', query='{{manga.title}}') }}">
+            <img src="{{ manga.cover() }}" alt="{{ manga.title }} cover" class="manga-cover">
+            <p>{{ shorten(manga.title, 50) }}</p>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+<a href="{{ url_for('search.search_home') }}">Back</a>
 {% endblock %}
