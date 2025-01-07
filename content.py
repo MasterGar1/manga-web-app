@@ -8,7 +8,7 @@ def library():
     return render_template('library.html', title='Library')
 
 @bp.route('/manga/<manga>')
-def manga_info(manga : str):
+def manga_info(manga):
     return render_template('manga.html', title=f'Manga {manga['title']}', manga=manga)
 
 @bp.route('/read/<manga>/<chapter>')

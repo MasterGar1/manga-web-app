@@ -67,13 +67,28 @@ class Manga:
                              key=lambda ch: ch.number)
 
     def cover(self) -> str:
-        return f'https://uploads.mangadex.org/covers/{self.id}/{self.cover_art}.png.256.jpg'
+        cover_url = f'https://api.mangadex.org/cover/{self.cover_art}'
+        cover_response = requests.get(cover_url)
+        cover_data = cover_response.json()
+
+        cover_filename = cover_data['data']['attributes']['fileName']
+        cdn_url = 'https://uploads.mangadex.org'
+        cover_image_url = f'{cdn_url}/covers/{self.id}/{cover_filename}.256.jpg'
+        return cover_image_url
         
     
 class Book(Manga):
     def __init__(self, info : dict, chapter : int = 0) -> None:
         self.chapter = chapter
         super().__init__(info)
+
+    def to_dict(self) -> dict:
+        return {
+            **{
+                'current_chapter' : self.chapter
+            },
+            **super().to_dict()
+        }
 
     def read_chapter(self) -> None:
         self.chapter += 1
@@ -84,6 +99,11 @@ class Book(Manga):
 class Library:
     def __init__(self, mangas : list[Book]) -> None:
         self.books = mangas
+
+    def to_dict(self) -> dict:
+        return {
+            'books' : self.books
+        }
 
     def add(self, manga : Manga) -> None:
         if not self.has(manga):
@@ -96,5 +116,14 @@ class Library:
         return manga in [ book[0] for book in self.books ]
     
 class User:
-    def __init__(self, nick : str, password : str, lib : Library) -> None:
-        pass
+    def __init__(self, json : dict) -> None:
+        self.username : str = json['username']
+        self.password : str = json['password']
+        self.library : Library = Library(json['library'])
+
+    def to_dict(self) -> dict:
+        return {
+            'username' : self.username,
+            'password' : self.password,
+            'library' : self.library.to_dict()
+        }
