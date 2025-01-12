@@ -6,8 +6,23 @@
 {% block body %}
 <h1>{{ title }}</h1>
 <div class="manga-details">
-    <img src="{{ manga_cover }}" alt="{{ manga }} cover" class="manga-cover">
-    <h2>{{ manga.title }}</h2>
-    <p>{{ manga.description }}</p>
+    <div class="manga-cover-wrapper">
+        <img src="{{ manga.cover() }}" alt="{{ title }} cover" class="manga-cover">
+    </div>
+    <div class="manga-info">
+        <h2>{{ manga.title }}</h2>
+        <p>{{ manga.description }}</p>
+        <div class="manga-tags">
+            {% for tag in manga.tags %}
+                <span class="tag-box">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        <div class="chapter-list">
+            <h3>Chapters</h3>
+            {% for chapter in manga.chapters() %}
+                <a href="{{ url_for('user.read', manga=manga.id, chapter=chapter.id) }}">Volume {{ chapter.volume }}, Chapter {{ chapter.number }}</a>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

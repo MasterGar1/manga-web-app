@@ -222,3 +222,71 @@ button:hover {
     flex: 1; 
     box-sizing: border-box;
 }
+
+.manga-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
+
+.manga-cover-wrapper {
+    flex-shrink: 0;
+    width: 200px;
+}
+
+.manga-cover {
+    width: 100%;
+    height: auto;
+}
+
+.manga-info {
+    flex-grow: 1;
+}
+
+.manga-tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.tag-box {
+    background-color: #444;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    align-content: center;
+}
+
+.tag-box:hover {
+    background-color: #555;
+}
+
+.chapter-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 20px;
+    border: 1px solid #444;
+    padding: 10px;
+    background-color: #222;
+}
+
+.chapter-list a {
+    display: block;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #333;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.chapter-list a:hover {
+    background-color: #444;
+}

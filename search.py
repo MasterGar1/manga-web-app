@@ -1,7 +1,7 @@
 import requests
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint, request, session
 
-from singleton import Manga
+from singleton import Manga, headers
 
 base_url = 'https://api.mangadex.org'
 
@@ -48,8 +48,10 @@ def search_home():
 @bp.route('/search/<query>')
 def search_results(query):
     name, included, excluded, order, sort_dir, demo, status, limit = query.split('+')
-    search_result : list[Manga] = search_manga(name, int(limit), included_tags=included.split(','), excluded_tags=excluded.split(','),
-                                               order={ order : sort_dir }, 
+    search_result : list[Manga] = search_manga(name, int(limit),
+                                               included_tags=included.split(','),
+                                               excluded_tags=excluded.split(','),
+                                               order={ order : sort_dir },
                                                status=status, demographic=demo)
     return render_template('result.html', title=f'Results for "{name}"', result=search_result, shorten=shorten)
 
@@ -77,11 +79,11 @@ def search_manga(title : str, limit : int, **args) -> list[Manga]:
             'limit' : limit,
             'includedTags[]' : included_ids,
             'excludedTags[]' : excluded_ids,
-            'status[]' : args['status'],
-            'publicationDemographic[]' : args['demographic'],
+            'status[]' : [args['status']],
+            'publicationDemographic[]' : [args['demographic']],
         },
         **order_fix
     }
 
-    response = requests.get(base_url + endpoint, params=params)
+    response = requests.get(base_url + endpoint, params=params, headers=headers)
     return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]

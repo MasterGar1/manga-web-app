@@ -3,7 +3,6 @@ from flask import Flask, render_template, redirect, url_for, session
 import search
 import login
 import content
-import file_manager
 
 app = Flask(__name__)
 app.secret_key = 'MangaScraper69'

@@ -9,7 +9,7 @@
 <div class="manga-grid">
     {% for manga in result %}
     <div class="manga-item">
-        <a href="{{ url_for('user.manga_info', manga='{{manga}}') }}">
+        <a href="{{ url_for('user.manga_info', id=manga.id) }}">
             <img src="{{ manga.cover() }}" alt="{{ manga.title }} cover" class="manga-cover">
             <p>{{ shorten(manga.title, 50) }}</p>
         </a>
