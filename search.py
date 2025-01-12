@@ -1,7 +1,7 @@
 import requests
 from flask import render_template, Blueprint, request, session
 
-from singleton import Manga, headers
+from singleton import Manga, JSON
 
 base_url = 'https://api.mangadex.org'
 
@@ -9,19 +9,20 @@ endpoint = '/manga'
 
 bp = Blueprint('search', __name__)
 
-demographics : list[str] = ['shounen', 'shoujo', 'josei', 'seinen']
-statuses : list[str] = ['ongoing', 'completed', 'haitus', 'cancelled']
-ordering : list[str] = ['title', 'year', 'createdAt', 'updatedAt', 'latestUploadedChapter', 'relevance']
-genres : list[str] = ['Action', 'Adventure', 'Boys Love', 
+spec_symbol: str = '\''
+demographics: list[str] = ['shounen', 'shoujo', 'josei', 'seinen']
+statuses: list[str] = ['ongoing', 'completed', 'haitus', 'cancelled']
+ordering: list[str] = ['title', 'year', 'createdAt', 'updatedAt', 'latestUploadedChapter', 'relevance']
+genres: list[str] = ['Action', 'Adventure', 'Boys Love', 
                       'Comedy', 'Crime', 'Drama', 'Fantasy', 
-                      'Girls Love', 'Historical', 'Horror', 
+                      f'Girls{spec_symbol} Love', 'Historical', 'Horror', 
                       'Isekai', 'Magical Girls', 'Mecha', 'Medical', 
                       'Mystery', 'Philosophical', 'Psychological', 'Romance', 
                       'Sci-Fi', 'Slice of Life', 'Sports', 'Superhero', 
                       'Thriller', 'Tragedy', 'Wuxia']
 
-def split_words(text : str) -> str:
-    words : list[str] = []
+def split_words(text: str) -> str:
+    words: list[str] = []
     last_word : int = 0
     for i, ch in enumerate(text):
         if ch.isupper():
@@ -30,7 +31,7 @@ def split_words(text : str) -> str:
     words.append(text[last_word:])
     return ' '.join(words).capitalize()
 
-def shorten(text : str, limit : int) -> str:
+def shorten(text: str, limit: int) -> str:
     if len(text) < limit:
         return text
     else:
@@ -46,7 +47,7 @@ def search_home():
                            word_split=split_words, cls=class_name)
 
 @bp.route('/search/<query>')
-def search_results(query):
+def search_results(query: str):
     name, included, excluded, order, sort_dir, demo, status, limit = query.split('+')
     search_result : list[Manga] = search_manga(name, int(limit),
                                                included_tags=included.split(','),
@@ -55,25 +56,25 @@ def search_results(query):
                                                status=status, demographic=demo)
     return render_template('result.html', title=f'Results for "{name}"', result=search_result, shorten=shorten)
 
-def search_manga(title : str, limit : int, **args) -> list[Manga]:
+def search_manga(title: str, limit: int, **args) -> list[Manga]:
     tags : dict = requests.get(f'{base_url}/manga/tag').json()
     if args['included_tags'] == []:
-        included_ids : list[str] = [ tag['id']
+        included_ids: list[str] = [ tag['id']
                             for tag in tags['data']
                             if tag['attributes']['name']['en'] in args['included_tags'][0] ]
-    else: included_ids : list[str] = []
+    else: included_ids: list[str] = []
 
     if args['excluded_tags'] == []:
-        excluded_ids : list[str] = [ tag['id']
+        excluded_ids: list[str] = [ tag['id']
                             for tag in tags['data']
                             if tag['attributes']['name']['en'] in args['excluded_tags'][0] ]
-    else: excluded_ids : list[str] = []
+    else: excluded_ids: list[str] = []
 
     if args['order'] == []:
-        order_fix : dict[str, str] = { f'order[{k}]' : v for k, v in args['order'].items() }
-    else: order_fix : dict[str, str] = {}
+        order_fix: JSON = { f'order[{k}]' : v for k, v in args['order'].items() }
+    else: order_fix: JSON = {}
     
-    params : dict = {
+    params: JSON = {
         **{
             'title' : title,
             'limit' : limit,
@@ -85,5 +86,5 @@ def search_manga(title : str, limit : int, **args) -> list[Manga]:
         **order_fix
     }
 
-    response = requests.get(base_url + endpoint, params=params, headers=headers)
+    response = requests.get(base_url + endpoint, params=params)
     return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]

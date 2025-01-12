@@ -88,7 +88,7 @@ class Manga:
 class Book(Manga):
     def __init__(self, info: JSON, chapter: int = 0, from_dict: bool = False) -> None:
         if from_dict:
-            self.chapter: str = info['chapter']
+            self.chapter: str = info['current_chapter']
         else:
             self.chapter: int = chapter
         super().__init__(info, from_dict)
