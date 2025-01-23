@@ -7,7 +7,7 @@
 <h1>{{ title }}</h1>
 <div class="manga-details">
     <div class="manga-cover-wrapper">
-        <img src="{{ manga.cover() }}" alt="{{ title }} cover" class="manga-cover">
+        <img src="{{ url_for('user.image_proxy', url=manga.cover()) }}" alt="{{ title }} cover" class="manga-cover">
     </div>
     <div class="manga-info">
         <h2>{{ manga.title }}</h2>

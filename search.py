@@ -1,7 +1,7 @@
 import requests
-from flask import render_template, Blueprint, request, session
+from flask import render_template, Blueprint, request
 
-from singleton import Manga, JSON
+from singleton import Manga, JSON, make_request
 
 base_url = 'https://api.mangadex.org'
 
@@ -57,7 +57,7 @@ def search_results(query: str):
     return render_template('result.html', title=f'Results for "{name}"', result=search_result, shorten=shorten)
 
 def search_manga(title: str, limit: int, **args) -> list[Manga]:
-    tags : dict = requests.get(f'{base_url}/manga/tag').json()
+    tags: JSON = make_request(f'{base_url}/manga/tag').json()
     if args['included_tags'] == []:
         included_ids: list[str] = [ tag['id']
                             for tag in tags['data']
@@ -86,5 +86,5 @@ def search_manga(title: str, limit: int, **args) -> list[Manga]:
         **order_fix
     }
 
-    response = requests.get(base_url + endpoint, params=params)
+    response = make_request(base_url + endpoint, params=params)
     return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]

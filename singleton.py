@@ -1,7 +1,7 @@
 import requests
 from typing import Any
-
 import base64
+from time import sleep
 
 type JSON = dict[str, Any]
 
@@ -35,7 +35,7 @@ class Chapter:
         return self.id != other.id
     
     def images(self) -> list[str]:
-        res = requests.get(f'https://api.mangadex.org/at-home/server/{self.id}')
+        res = make_request(f'https://api.mangadex.org/at-home/server/{self.id}')
         json: dict[str, Any] = res.json()
         return [ f'{json['baseUrl']}/data/{json['chapter']['hash']}/{img}' for img in json['chapter']['data'] ]
 
@@ -84,14 +84,14 @@ class Manga:
         return self.id != other.id
     
     def chapters(self) -> list[Chapter]:
-        res = requests.get(f'https://api.mangadex.org/manga/{self.id}/feed')
+        res = make_request(f'https://api.mangadex.org/manga/{self.id}/feed')
         return sorted([ Chapter(ch) for ch in res.json()['data'] if ch['attributes']['translatedLanguage'] == 'en'], 
                              key=lambda ch: 
                              (float(ch.volume) if ch.volume else None,
                               float(ch.number) if ch.number else None))
 
     def cover(self) -> str:
-        cover_response = requests.get(f'https://api.mangadex.org/cover/{self.cover_art}')
+        cover_response = make_request(f'https://api.mangadex.org/cover/{self.cover_art}')
         cover_filename: str = cover_response.json()['data']['attributes']['fileName']
         return f'https://uploads.mangadex.org/covers/{self.id}/{cover_filename}.256.jpg'
  
@@ -168,5 +168,22 @@ class User:
 
 def get_manga(id: str) -> Manga:
     manga_url: str = f'https://api.mangadex.org/manga/{id}'
-    response = requests.get(manga_url)
+    response = make_request(manga_url)
     return Manga(response.json()['data'])
+
+def make_request(url: str, params: dict[str, str] = {}) -> Any:
+    headers: dict[str, str] = {
+        'User-Agent' : 'MangaApp/1.0 (https://github.com/MasterGar1/manga-web-app)'
+    }
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 429:
+            print('Rate exceeded!')
+            sleep(2)
+            return make_request(url, params)
+        response.raise_for_status()
+        return response
+    except requests.exceptions.RequestException as e:
+        print(f'Error: {e}')
+        return None
+

@@ -1,5 +1,5 @@
-from flask import render_template, Blueprint, session
-from singleton import Manga, User, get_manga
+from flask import render_template, Blueprint, session, Response, request
+from singleton import Manga, User, get_manga, make_request
 from file_manager import update_user, get_user
 
 bp = Blueprint('user', __name__)
@@ -26,3 +26,9 @@ def read(manga: str, chapter: str):
                            title=f'Read {cur_manga.title} {cur_chapter.number}',
                            manga=manga,
                            chapter=cur_chapter)
+
+@bp.route('/image-proxy')
+def image_proxy():
+    url: str = request.args.get('url')
+    response = make_request(url)
+    return Response(response.content, content_type=response.headers['Content-Type'])

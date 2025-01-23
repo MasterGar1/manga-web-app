@@ -7,7 +7,7 @@
 <div class="image-container">
     {% for img in chapter.images() %}
     <div class="image-wrapper">
-        <img src="{{ img }}" alt="Manga Image" style="display: block; width: 100%;">
+        <img src="{{ url_for('user.image_proxy', url=img) }}" alt="Manga Image" style="display: block; width: 100%;">
     </div>
     {% endfor %}
 </div>
