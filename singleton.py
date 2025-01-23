@@ -1,7 +1,17 @@
 import requests
 from typing import Any
 
+import base64
+
 type JSON = dict[str, Any]
+
+def encrypt(input_string: str, key: int = 69) -> str:
+    enc: str = ''.join(chr(ord(c) ^ key) for c in input_string)
+    return base64.urlsafe_b64encode(enc.encode()).decode()
+
+def decrypt(input_string: str, key: int = 69) -> str:
+    dec: str = base64.urlsafe_b64decode(input_string.encode()).decode()
+    return ''.join(chr(ord(c) ^ key) for c in dec)
 
 class Chapter:
     def __init__(self, info: JSON) -> None:
@@ -86,17 +96,20 @@ class Manga:
         return f'https://uploads.mangadex.org/covers/{self.id}/{cover_filename}.256.jpg'
  
 class Book(Manga):
-    def __init__(self, info: JSON, chapter: int = 0, from_dict: bool = False) -> None:
+    def __init__(self, info: JSON, chapter: int = 0, volume: int = 0, from_dict: bool = False) -> None:
         if from_dict:
-            self.chapter: str = info['current_chapter']
+            self.chapter: int = info['current_chapter']
+            self.volume: int = info['current_volume']
         else:
             self.chapter: int = chapter
+            self.volume: int = volume
         super().__init__(info, from_dict)
 
     def to_dict(self) -> JSON:
         return {
             **{
-                'current_chapter' : self.chapter
+                'current_chapter' : self.chapter,
+                'current_volume' : self.volume
             },
             **super().to_dict()
         }
@@ -113,6 +126,12 @@ class Library:
             self.books: list[Book] = [ Book(bk, from_dict=True) for bk in mangas['books'] ]
         else:
             self.books: list[Book] = [ Book(mgn, 0) for mgn in mangas ]
+
+    def get(self, key: str) -> Book:
+        return [ bk for bk in self.books if bk.id == key ][0]
+    
+    def set(self, key: str, value: Book) -> None:
+        self.books = [ bk for bk in self.books if bk.id != key ] + [value]
 
     def to_dict(self) -> JSON:
         return {
@@ -141,6 +160,11 @@ class User:
             'password' : self.password,
             'library' : self.library.to_dict()
         }
+    
+    def update(self, manga: Manga, chapter: JSON) -> None:
+        self.library.set(manga.id,
+                         Book(manga.to_dict() | chapter, 
+                              from_dict=True))
 
 def get_manga(id: str) -> Manga:
     manga_url: str = f'https://api.mangadex.org/manga/{id}'

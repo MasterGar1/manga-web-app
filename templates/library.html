@@ -5,4 +5,16 @@
 
 {% block body %}
 <h1>Library</h1>
+<div class="manga-grid">
+    {% for manga in library %}
+    <div class="manga-item">
+        <a href="{{ url_for('user.manga_info', id=manga.id) }}">
+            <img src="{{ manga.cover() }}" alt="{{ manga.title }} cover" class="manga-cover">
+            <p>{{ manga.title }}</p>
+            <p>{{ manga.chapter }} / {{ manga.last_chapter }}</p>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+<a href="{{ url_for('home') }}">Back</a>
 {% endblock %}

@@ -15,7 +15,6 @@ def login():
         
         if username in users and check_password_hash(users[username], password):
             session['username'] = username
-            fm.choose_user(username)
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         else:
