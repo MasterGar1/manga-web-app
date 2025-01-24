@@ -9,17 +9,9 @@ endpoint = '/manga'
 
 bp = Blueprint('search', __name__)
 
-spec_symbol: str = '\''
-demographics: list[str] = ['shounen', 'shoujo', 'josei', 'seinen']
-statuses: list[str] = ['ongoing', 'completed', 'haitus', 'cancelled']
+demographics: list[str] = ['any', 'shounen', 'shoujo', 'josei', 'seinen']
+statuses: list[str] = ['any', 'ongoing', 'completed', 'haitus', 'cancelled']
 ordering: list[str] = ['title', 'year', 'createdAt', 'updatedAt', 'latestUploadedChapter', 'relevance']
-genres: list[str] = ['Action', 'Adventure', 'Boys Love', 
-                      'Comedy', 'Crime', 'Drama', 'Fantasy', 
-                      f'Girls{spec_symbol} Love', 'Historical', 'Horror', 
-                      'Isekai', 'Magical Girls', 'Mecha', 'Medical', 
-                      'Mystery', 'Philosophical', 'Psychological', 'Romance', 
-                      'Sci-Fi', 'Slice of Life', 'Sports', 'Superhero', 
-                      'Thriller', 'Tragedy', 'Wuxia']
 
 def split_words(text: str) -> str:
     words: list[str] = []
@@ -42,13 +34,15 @@ def search_home():
     class_name = None
     if request.method == 'POST':
         class_name = request.args
+    tags: JSON = make_request(f'{base_url}/manga/tag').json()
+    genres = sorted([ tag['attributes']['name']['en'] for tag in tags['data'] ])
     return render_template('search.html', title='Search', genres=genres, 
                            orders=ordering, status=statuses, demogr=demographics,
                            word_split=split_words, cls=class_name)
 
 @bp.route('/search/<query>')
 def search_results(query: str):
-    name, included, excluded, order, sort_dir, demo, status, limit = query.split('+')
+    name, included, excluded, order, sort_dir, demo, status, limit = [ el.strip() for el in query.split('+') ]
     search_result : list[Manga] = search_manga(name, int(limit),
                                                included_tags=included.split(','),
                                                excluded_tags=excluded.split(','),
@@ -58,33 +52,34 @@ def search_results(query: str):
 
 def search_manga(title: str, limit: int, **args) -> list[Manga]:
     tags: JSON = make_request(f'{base_url}/manga/tag').json()
-    if args['included_tags'] == []:
-        included_ids: list[str] = [ tag['id']
-                            for tag in tags['data']
-                            if tag['attributes']['name']['en'] in args['included_tags'][0] ]
-    else: included_ids: list[str] = []
 
-    if args['excluded_tags'] == []:
-        excluded_ids: list[str] = [ tag['id']
-                            for tag in tags['data']
-                            if tag['attributes']['name']['en'] in args['excluded_tags'][0] ]
-    else: excluded_ids: list[str] = []
-
-    if args['order'] == []:
-        order_fix: JSON = { f'order[{k}]' : v for k, v in args['order'].items() }
-    else: order_fix: JSON = {}
-    
     params: JSON = {
-        **{
-            'title' : title,
-            'limit' : limit,
-            'includedTags[]' : included_ids,
-            'excludedTags[]' : excluded_ids,
-            'status[]' : [args['status']],
-            'publicationDemographic[]' : [args['demographic']],
-        },
-        **order_fix
+        'limit' : limit
     }
+
+    order_fix: JSON = { f'order[{k}]' : v for k, v in args['order'].items() }
+    params |= order_fix
+
+    if args['status'] != 'any':
+        params |= { 'status[]' : [args['status']] }
+
+    if args['demographic'] != 'any':
+        params |= { 'publicationDemographic[]' : [args['demographic']] }
+
+    if title != '':
+        params |= { 'title' : title }
+
+    if args['included_tags'] != ['']:
+        params |= { 'includedTags[]' : [ tag['id']
+                            for tag in tags['data']
+                            if tag['attributes']['name']['en'] 
+                            in args['included_tags'] ] }
+
+    if args['excluded_tags'] != ['']:
+        params |= { 'excludedTags[]' : [ tag['id']
+                            for tag in tags['data']
+                            if tag['attributes']['name']['en'] 
+                            in args['excluded_tags'] ] }
 
     response = make_request(base_url + endpoint, params=params)
     return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]

@@ -44,7 +44,7 @@
                 <label>Demographic:</label>
                 <div class="demo-grid">
                     {% for item in demogr %}
-                    {% if item == 'shounen' %}
+                    {% if item == 'any' %}
                         <input type="radio" id="demo-{{ item }}" name="demo" value="{{ item }}" checked>
                     {% else %}
                         <input type="radio" id="demo-{{ item }}" name="demo" value="{{ item }}">
@@ -57,7 +57,7 @@
                 <label>Status:</label>
                 <div class="status-grid">
                     {% for item in status %}
-                    {% if item == 'ongoing' %}
+                    {% if item == 'any' %}
                         <input type="radio" id="status-{{ item }}" name="status" value="{{ item }}" checked>
                     {% else %}
                         <input type="radio" id="status-{{ item }}" name="status" value="{{ item }}">

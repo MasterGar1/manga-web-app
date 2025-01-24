@@ -12,8 +12,12 @@
     {% endfor %}
 </div>
 <div class="chapter-controls">
-    <button type="button" onclick="">Prev</button>
-    <button type="button" onclick="">Next</button>
+    {% if not prev is none %}
+        <a href="{{ url_for('user.read', manga=manga, chapter=prev.id) }}">Prev</a>
+    {% endif %}
+    {% if not next is none %}
+        <a href="{{ url_for('user.read', manga=manga, chapter=next.id) }}">Next</a>
+    {% endif %}
 </div>
 <a href="{{ url_for('user.manga_info', id=manga) }}">Back</a>
 {% endblock %}
