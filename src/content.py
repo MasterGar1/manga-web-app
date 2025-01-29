@@ -1,7 +1,7 @@
 from flask import render_template, Blueprint, session, Response, request, redirect
 
-from singleton import Manga, User, get_manga, make_request, Chapter, ordering, get_genres, split_words, Library
-from file_manager import update_user, get_user, update_user_simple
+from .singleton import Manga, User, get_manga, make_request, Chapter, ordering, get_genres, split_words, Library
+from .file_manager import update_user, get_user, update_user_simple
 
 bp = Blueprint('user', __name__)
 

@@ -1,11 +1,11 @@
 from flask import render_template, redirect, url_for, session, request, flash, Blueprint
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from singleton import User, Library
-import file_manager as fm
+from .singleton import User, Library
+from .file_manager import get_name_pass, save_user
 bp = Blueprint('auth', __name__)
 
-users : dict[str, str] = fm.get_name_pass()
+users : dict[str, str] = get_name_pass()
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -32,7 +32,7 @@ def signup():
             flash('Username is in use!', 'danger')
         else:
             users[username] = generate_password_hash(password)
-            fm.save_user(User({
+            save_user(User({
                 'username' : username,
                 'password' : generate_password_hash(password),
                 'library' : Library([]).to_dict()

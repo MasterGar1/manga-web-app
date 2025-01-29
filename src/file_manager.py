@@ -1,4 +1,4 @@
-from singleton import User, encrypt, Manga
+from .singleton import User, encrypt, Manga
 
 import json
 import os

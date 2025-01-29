@@ -1,7 +1,7 @@
 import requests
 from flask import render_template, Blueprint, request
 
-from singleton import Manga, JSON, make_request, ordering, demographics, statuses, split_words, get_genres
+from .singleton import Manga, JSON, make_request, ordering, demographics, statuses, split_words, get_genres
 
 base_url = 'https://api.mangadex.org'
 
