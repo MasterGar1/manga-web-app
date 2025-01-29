@@ -14,7 +14,7 @@ Manga reader app in python
     ```bash
     pip install -r requirements.txt
     ```
-4. Run the app:
+4.Run the app:
     ```bash
     python main.py
     ```
