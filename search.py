@@ -1,7 +1,7 @@
 import requests
 from flask import render_template, Blueprint, request
 
-from singleton import Manga, JSON, make_request
+from singleton import Manga, JSON, make_request, ordering, demographics, statuses, split_words, get_genres
 
 base_url = 'https://api.mangadex.org'
 
@@ -9,36 +9,18 @@ endpoint = '/manga'
 
 bp = Blueprint('search', __name__)
 
-demographics: list[str] = ['any', 'shounen', 'shoujo', 'josei', 'seinen']
-statuses: list[str] = ['any', 'ongoing', 'completed', 'haitus', 'cancelled']
-ordering: list[str] = ['title', 'year', 'createdAt', 'updatedAt', 'latestUploadedChapter', 'relevance']
-
-def split_words(text: str) -> str:
-    words: list[str] = []
-    last_word : int = 0
-    for i, ch in enumerate(text):
-        if ch.isupper():
-            words.append(text[last_word:i])
-            last_word = i
-    words.append(text[last_word:])
-    return ' '.join(words).capitalize()
-
 def shorten(text: str, limit: int) -> str:
     if len(text) < limit:
         return text
     else:
         return text[:limit] + '...'
 
-@bp.route('/search', methods=['GET', 'POST'])
+@bp.route('/search')
 def search_home():
-    class_name = None
-    if request.method == 'POST':
-        class_name = request.args
-    tags: JSON = make_request(f'{base_url}/manga/tag').json()
-    genres = sorted([ tag['attributes']['name']['en'] for tag in tags['data'] ])
+    genres: list[str] = get_genres()
     return render_template('search.html', title='Search', genres=genres, 
                            orders=ordering, status=statuses, demogr=demographics,
-                           word_split=split_words, cls=class_name)
+                           word_split=split_words)
 
 @bp.route('/search/<query>')
 def search_results(query: str):
@@ -48,7 +30,7 @@ def search_results(query: str):
                                                excluded_tags=excluded.split(','),
                                                order={ order : sort_dir },
                                                status=status, demographic=demo)
-    return render_template('result.html', title=f'Results for "{name}"', result=search_result, shorten=shorten)
+    return render_template('result.html', title=f'Results for {name if len(name) > 0 else 'ANY'}', result=search_result, shorten=shorten)
 
 def search_manga(title: str, limit: int, **args) -> list[Manga]:
     tags: JSON = make_request(f'{base_url}/manga/tag').json()

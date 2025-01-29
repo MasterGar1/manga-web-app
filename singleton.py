@@ -5,6 +5,10 @@ from time import sleep
 
 type JSON = dict[str, Any]
 
+demographics: list[str] = ['any', 'shounen', 'shoujo', 'josei', 'seinen']
+statuses: list[str] = ['any', 'ongoing', 'completed', 'haitus', 'cancelled']
+ordering: list[str] = ['title', 'year', 'createdAt', 'updatedAt', 'latestUploadedChapter', 'relevance']
+
 def encrypt(input_string: str, key: int = 69) -> str:
     enc: str = ''.join(chr(ord(c) ^ key) for c in input_string)
     return base64.urlsafe_b64encode(enc.encode()).decode()
@@ -12,6 +16,16 @@ def encrypt(input_string: str, key: int = 69) -> str:
 def decrypt(input_string: str, key: int = 69) -> str:
     dec: str = base64.urlsafe_b64decode(input_string.encode()).decode()
     return ''.join(chr(ord(c) ^ key) for c in dec)
+
+def split_words(text: str) -> str:
+    words: list[str] = []
+    last_word : int = 0
+    for i, ch in enumerate(text):
+        if ch.isupper():
+            words.append(text[last_word:i])
+            last_word = i
+    words.append(text[last_word:])
+    return ' '.join(words).capitalize()
 
 class Chapter:
     def __init__(self, info: JSON) -> None:
@@ -113,6 +127,10 @@ class Book(Manga):
             },
             **super().to_dict()
         }
+    
+    @staticmethod
+    def properties() -> list[str]:
+        return ['id', 'title', 'demographic', 'last_chapter', 'current_chapter']
 
     def read_chapter(self) -> None:
         self.chapter += 1
@@ -143,10 +161,20 @@ class Library:
             self.books.append(manga)
     
     def remove(self, manga: Manga) -> None:
-        self.books = [ book for book in self.books if book[0] != manga ]
+        self.books = [ book for book in self.books if book.id != manga.id ]
 
     def has(self, manga: Manga) -> bool:
-        return manga in [ book[0] for book in self.books ]
+        return manga.id in [ book.id for book in self.books ]
+    
+    def sort(self, property: str, order: str) -> None:
+        props: list[str] = Book.properties()
+        if property in props:
+            self.books.sort(key=lambda bk: bk.to_dict()[property], reverse=(order == 'desc'))
+    
+    def filter(self, genre: str) -> None:
+        if genre != 'Any':
+            self.books = [ bk for bk in self.books if genre in bk.tags ]
+
     
 class User:
     def __init__(self, json: JSON) -> None:
@@ -170,6 +198,10 @@ def get_manga(id: str) -> Manga:
     manga_url: str = f'https://api.mangadex.org/manga/{id}'
     response = make_request(manga_url)
     return Manga(response.json()['data'])
+
+def get_genres() -> list[str]:
+    tags: JSON = make_request('https://api.mangadex.org/manga/tag').json()
+    return sorted([ tag['attributes']['name']['en'] for tag in tags['data'] ])
 
 def make_request(url: str, params: dict[str, str] = {}) -> Any:
     headers: dict[str, str] = {

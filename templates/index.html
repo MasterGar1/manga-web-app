@@ -4,9 +4,9 @@
 {% endblock %}
 
 {% block body %}
-<h1>Home</h1>
+<h1>Welcome to Manga Web Scraper</h1>
 <div class="container">
-    <a href="{{ url_for('search.search_home') }}">Search</a>
-    <a href="{{ url_for('user.library') }}">Library</a>
+    <a href="{{ url_for('search.search_home') }}">Search Manga</a>
+    <a href="{{ url_for('user.library', query='none') }}">View Library</a>
 </div>
 {% endblock %}

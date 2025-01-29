@@ -43,3 +43,8 @@ def update_user(name: str, manga: Manga, chapter: int) -> None:
     delete_user(name)
     if not user is None:
         save_user(user)
+
+def update_user_simple(user: User) -> None:
+    if not user is None:
+        delete_user(user.username)
+        save_user(user)

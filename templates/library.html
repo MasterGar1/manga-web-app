@@ -5,9 +5,44 @@
 
 {% block body %}
 <h1>Library</h1>
+<button id="open-popup" class="sort-filter-btn">Sort/Filter</button>
+
+<div class="popup" id="popup">
+    <div class="popup-header">
+        <h2>Sort and Filter</h2>
+        <span class="popup-close" id="close-popup">&times;</span>
+    </div>
+    <div class="popup-content">
+        <label for="sort">Sort by:</label>
+        <select id="sort">
+            {% for ord in order %}
+                <option value="{{ ord }}">{{ word_split(ord) }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Order:</label>
+        <div class="radio-group">
+            <input type="radio" id="asc" name="order" value="asc" checked>
+            <label for="asc">Ascending</label>
+            <input type="radio" id="desc" name="order" value="desc">
+            <label for="desc">Descending</label>
+        </div>
+
+        <label for="genre">Filter by:</label>
+        <select id="genre">
+            {% for tag in genres %}
+                <option value="{{ tag }}">{{ tag }}</option>
+            {% endfor %}
+        </select>
+
+        <button onclick="apply_search()">Apply</button>
+    </div>
+</div>
+
 <div class="manga-grid">
     {% for manga in library %}
-    <div class="manga-item">
+    <div class="manga-item" id="manga-{{ manga.id }}">
+        <a href="{{ url_for('user.remove_proxy', id=manga.id) }}" class="remove-btn">X</a>
         <a href="{{ url_for('user.manga_info', id=manga.id) }}">
             <img src="{{ url_for('user.image_proxy', url=manga.cover()) }}" alt="{{ manga.title }} cover" class="manga-cover">
             <p>{{ manga.title }}</p>
@@ -17,4 +52,31 @@
     {% endfor %}
 </div>
 <a href="{{ url_for('home') }}">Back</a>
+
+<script>
+    document.getElementById('open-popup').addEventListener('click', function() {
+        document.getElementById('popup').classList.add('active');
+    });
+
+    document.getElementById('close-popup').addEventListener('click', function() {
+        document.getElementById('popup').classList.remove('active');
+    });
+
+    function get_query_params() {
+        const sorting = document.getElementById('sort').value;
+        const order = document.querySelector('input[name="order"]:checked').value;
+        const genre = document.getElementById('genre').value;
+        return `${sorting}+${order}+${genre}`;
+    }
+
+    document.getElementById('apply-filters').addEventListener('click', function() {
+        apply_search();
+    });
+
+    function apply_search() {
+        const query_params = get_query_params();
+        const search_url = `{{ url_for('user.library', query='') }}${query_params}`;
+        window.location.href = search_url;
+    }
+</script>
 {% endblock %}
