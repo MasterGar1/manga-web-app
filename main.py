@@ -1,6 +1,8 @@
+"""Main file. Used to run the project."""
+import os
+
 from flask import Flask, render_template, redirect, url_for, session
 import dotenv
-import os
 
 import src.search as sc
 import src.login as ln
@@ -16,6 +18,7 @@ app.register_blueprint(ct.bp)
 
 @app.route('/')
 def home():
+    """Home Page"""
     if 'username' in session:
         return render_template('index.html', username=session['username'])
     return redirect(url_for('auth.login'))
