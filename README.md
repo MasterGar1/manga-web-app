@@ -1,4 +1,4 @@
-# manga-web-scraper
+# manga-web-app
 Manga reader app in python
 
 ## Installation
