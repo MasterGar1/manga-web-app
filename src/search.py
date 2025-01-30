@@ -4,7 +4,8 @@ from typing import Any
 from flask import render_template, Blueprint
 
 from .classes import Manga, make_request
-from .utility import get_genres, ordering, statuses, demographics, split_words
+from .utility import get_genres, ordering, statuses,\
+                        demographics, split_words, fix_hyphon
 
 BASE_URL:str = 'https://api.mangadex.org'
 
@@ -56,12 +57,12 @@ def search_manga(title: str, limit: int, **args) -> list[Manga]:
     if args['included_tags'] != ['']:
         params |= { 'includedTags[]' : [ tag['id']
                             for tag in tags['data']
-                            if tag['attributes']['name']['en']
+                            if fix_hyphon(tag['attributes']['name']['en'])
                             in args['included_tags'] ] }
     if args['excluded_tags'] != ['']:
         params |= { 'excludedTags[]' : [ tag['id']
                             for tag in tags['data']
-                            if tag['attributes']['name']['en']
+                            if fix_hyphon(tag['attributes']['name']['en'])
                             in args['excluded_tags'] ] }
     response = make_request(BASE_URL + ENDPOINT, params=params)
     return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]

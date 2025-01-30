@@ -1,6 +1,6 @@
 """Unittests for utility module"""
 import unittest
-from src.utility import encrypt, decrypt, split_words
+from src.utility import encrypt, decrypt, split_words, fix_hyphon
 
 class TestsUtility(unittest.TestCase):
     def test_encrypt_decrypt(self):
@@ -22,6 +22,14 @@ class TestsUtility(unittest.TestCase):
     def test_split_words_snake(self):
         """Test case for split with snake_case"""
         self.assertEqual(split_words("another_test_case"), "Another test case")
+
+    def test_fix_hyphon(self):
+        """Test case for fix_hyphon function"""
+        self.assertEqual(fix_hyphon("Girls' Love"), "Yuri")
+        self.assertEqual(fix_hyphon("Boys' Love"), "Yaoi")
+        self.assertEqual(fix_hyphon("Yuri"), "Girls' Love")
+        self.assertEqual(fix_hyphon("Yaoi"), "Boys' Love")
+        self.assertEqual(fix_hyphon("Action"), "Action")
 
 if __name__ == '__main__':
     unittest.main()

@@ -33,6 +33,20 @@ def split_words(text: str) -> str:
     words.append(text[last_word:])
     return ' '.join(words).capitalize()
 
+def fix_hyphon(text: str) -> str:
+    """Fixes ' symbol in some genres (Fixes gay stuff)"""
+    match text:
+        case 'Girls\' Love':
+            return 'Yuri'
+        case 'Boys\' Love':
+            return 'Yaoi'
+        case 'Yuri':
+            return 'Girls\' Love'
+        case 'Yaoi':
+            return 'Boys\' Love'
+        case _:
+            return text
+
 def get_manga(manga_id: str) -> Manga:
     """Gets a manga by id"""
     manga_url: str = f'https://api.mangadex.org/manga/{manga_id}'
@@ -42,4 +56,4 @@ def get_manga(manga_id: str) -> Manga:
 def get_genres() -> list[str]:
     """Gets all available generes"""
     tags: dict[str, Any] = make_request('https://api.mangadex.org/manga/tag').json()
-    return sorted([ tag['attributes']['name']['en'] for tag in tags['data'] ])
+    return sorted([ fix_hyphon(tag['attributes']['name']['en']) for tag in tags['data'] ])
