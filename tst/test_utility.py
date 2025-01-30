@@ -2,7 +2,7 @@
 import unittest
 from src.utility import encrypt, decrypt, split_words
 
-class TestEncryptDecrypt(unittest.TestCase):
+class TestsUtility(unittest.TestCase):
     def test_encrypt_decrypt(self):
         """Tests Case for encryption/decryption"""
         original_text = "HelloWorld"
@@ -11,7 +11,6 @@ class TestEncryptDecrypt(unittest.TestCase):
         decrypted_text = decrypt(encrypted_text, key)
         self.assertEqual(original_text, decrypted_text)
 
-class TestSplitWords(unittest.TestCase):
     def test_split_words_pascal(self):
         """Test case for split with PascalCase"""
         self.assertEqual(split_words("HelloWorld"), "Hello world")

@@ -77,6 +77,64 @@ class TestLibrary(unittest.TestCase):
         self.library.remove(self.manga)
         self.assertFalse(self.library.has(self.manga))
 
+    def test_library_sort(self):
+        manga_info_2 = {
+            'id': '2',
+            'attributes': {
+                'title': {'en': 'Another Manga'},
+                'description': {'en': 'Another Description'},
+                'tags': [{'attributes': {'name': {'en': 'Adventure'}}}],
+                'publicationDemographic': 'shounen',
+                'lastChapter': '5',
+                'lastVolume': '1'
+            },
+            'relationships': [{'id': 'cover2', 'type': 'cover_art'}]
+        }
+        manga_2 = Manga(manga_info_2)
+        self.library.add(manga_2)
+        self.library.sort('title', 'asc')
+        self.assertEqual(self.library.books[0].title, 'Another Manga')
+        self.library.sort('title', 'desc')
+        self.assertEqual(self.library.books[0].title, 'Test Manga')
+
+    def test_library_filter(self):
+        manga_info_2 = {
+            'id': '2',
+            'attributes': {
+                'title': {'en': 'Another Manga'},
+                'description': {'en': 'Another Description'},
+                'tags': [{'attributes': {'name': {'en': 'Adventure'}}}],
+                'publicationDemographic': 'shounen',
+                'lastChapter': '5',
+                'lastVolume': '1'
+            },
+            'relationships': [{'id': 'cover2', 'type': 'cover_art'}]
+        }
+        manga_2 = Manga(manga_info_2)
+        self.library.add(manga_2)
+        self.library.filter('Adventure')
+        self.assertEqual(len(self.library.books), 1)
+        self.assertEqual(self.library.books[0].title, 'Another Manga')
+
+    def test_library_search(self):
+        manga_info_2 = {
+            'id': '2',
+            'attributes': {
+                'title': {'en': 'Another Manga'},
+                'description': {'en': 'Another Description'},
+                'tags': [{'attributes': {'name': {'en': 'Adventure'}}}],
+                'publicationDemographic': 'shounen',
+                'lastChapter': '5',
+                'lastVolume': '1'
+            },
+            'relationships': [{'id': 'cover2', 'type': 'cover_art'}]
+        }
+        manga_2 = Manga(manga_info_2)
+        self.library.add(manga_2)
+        self.library.search('Another')
+        self.assertEqual(len(self.library.books), 1)
+        self.assertEqual(self.library.books[0].title, 'Another Manga')
+
 class TestUser(unittest.TestCase):
     def setUp(self):
         self.user_info = {

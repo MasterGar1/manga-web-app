@@ -163,6 +163,11 @@ class Library:
         """Check if book exists"""
         return manga.id in [ book.id for book in self.books ]
 
+    def search(self, name: str) -> None:
+        """Search in library"""
+        self.books = [ bk for bk in self.books
+                      if bk.title.count(name) > 0 ]
+
     def sort(self, prop: str, order: str) -> None:
         """Sort library"""
         ordir: bool = order == 'desc'

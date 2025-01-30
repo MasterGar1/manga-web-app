@@ -9,10 +9,13 @@
 
 <div class="popup" id="popup">
     <div class="popup-header">
-        <h2>Sort and Filter</h2>
+        <h2>Search Library</h2>
         <span class="popup-close" id="close-popup">&times;</span>
     </div>
     <div class="popup-content">
+        <label for="search">Name:</label>
+        <input type="text" id="search" name="search">
+
         <label for="sort">Sort by:</label>
         <select id="sort">
             {% for ord in order %}
@@ -66,7 +69,8 @@
         const sorting = document.getElementById('sort').value;
         const order = document.querySelector('input[name="order"]:checked').value;
         const genre = document.getElementById('genre').value;
-        return `${sorting}+${order}+${genre}`;
+        const name = document.getElementById('search').value;
+        return `${sorting}+${order}+${genre}+${name}`;
     }
 
     document.getElementById('apply-filters').addEventListener('click', function() {
