@@ -21,7 +21,7 @@ def login():
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         flash('Invalid username or password', 'danger')
-    return render_template('login.html')
+    return render_template('login.html', title='Login')
 
 @bp.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -41,7 +41,7 @@ def signup():
             }))
             flash('Signup successful!', 'success')
             return redirect(url_for('auth.login'))
-    return render_template('signup.html')
+    return render_template('signup.html', title='Sign Up')
 
 @bp.route('/signout')
 def signout():
