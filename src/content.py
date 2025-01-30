@@ -67,7 +67,7 @@ def remove_proxy(manga_id: str):
     return redirect('/library/none')
 
 @bp.route('/image-proxy')
-def image_proxy():
+def image_proxy() -> Response:
     """Proxy image to generate images"""
     url: str = request.args.get('url')
     response = make_request(url)

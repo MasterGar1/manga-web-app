@@ -153,7 +153,7 @@ class Library:
     def add(self, manga: Manga) -> None:
         """Add a new book"""
         if not self.has(manga):
-            self.books.append(manga)
+            self.books.append(Book(manga.to_dict()))
 
     def remove(self, manga: Manga) -> None:
         """Remove a book"""
@@ -206,7 +206,7 @@ class User:
                          Book(manga.to_dict() | chapter,
                               from_dict=True))
 
-def make_request(url: str, params: dict[str, str] = None) -> Any:
+def make_request(url: str, params: dict[str, str] | None = None) -> Any:
     """Request maker"""
     if params is None:
         params = {}
