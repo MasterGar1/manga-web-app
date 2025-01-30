@@ -43,7 +43,7 @@ def search_results(query: str):
 
 def search_manga(title: str, limit: int, **args) -> list[Manga]:
     """Search manga"""
-    tags: dict[str, Any] = make_request(f'{BASE_URL}/manga/tag').json_dict()
+    tags: dict[str, Any] = make_request(f'{BASE_URL}/manga/tag').json()
     params: dict[str, Any] = { 'limit' : limit }
     order_fix: dict[str, Any] = { f'order[{k}]' : v for k, v in args['order'].items() }
     params |= order_fix
@@ -64,4 +64,4 @@ def search_manga(title: str, limit: int, **args) -> list[Manga]:
                             if tag['attributes']['name']['en']
                             in args['excluded_tags'] ] }
     response = make_request(BASE_URL + ENDPOINT, params=params)
-    return [ mgn for m in response.json_dict()['data'] if (mgn := Manga(m)).title != '.' ]
+    return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]

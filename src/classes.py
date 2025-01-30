@@ -29,9 +29,9 @@ class Chapter:
     def images(self) -> list[str]:
         """Returns a list of links to all chapter images"""
         res = make_request(f'https://api.mangadex.org/at-home/server/{self.id}')
-        json_dict: dict[str, Any] = res.json_dict()
-        return [ f'{json_dict['baseUrl']}/data/{json_dict['chapter']['hash']}/{img}'
-                for img in json_dict['chapter']['data'] ]
+        json: dict[str, Any] = res.json()
+        return [ f'{json['baseUrl']}/data/{json['chapter']['hash']}/{img}'
+                for img in json['chapter']['data'] ]
 
 class Manga:
     """Class implementation for manga"""
@@ -84,7 +84,7 @@ class Manga:
     def chapters(self) -> list[Chapter]:
         """Return list of chapters"""
         res = make_request(f'https://api.mangadex.org/manga/{self.id}/feed')
-        return sorted([ Chapter(ch) for ch in res.json_dict()['data']
+        return sorted([ Chapter(ch) for ch in res.json()['data']
                        if ch['attributes']['translatedLanguage'] == 'en'],
                              key=lambda ch:
                              (float(ch.volume) if ch.volume else None,
@@ -93,7 +93,7 @@ class Manga:
     def cover(self) -> str:
         """Get cover image"""
         cover_response = make_request(f'https://api.mangadex.org/cover/{self.cover_art}')
-        cover_filename: str = cover_response.json_dict()['data']['attributes']['fileName']
+        cover_filename: str = cover_response.json()['data']['attributes']['fileName']
         return f'https://uploads.mangadex.org/covers/{self.id}/{cover_filename}.256.jpg'
 
 class Book(Manga):
@@ -178,10 +178,10 @@ class Library:
 
 class User:
     """Class implementation for a User profile"""
-    def __init__(self, json_dict: dict[str, Any]) -> None:
-        self.username: str = json_dict['username']
-        self.password: str = json_dict['password']
-        self.library: Library = Library(json_dict['library'], True)
+    def __init__(self, json: dict[str, Any]) -> None:
+        self.username: str = json['username']
+        self.password: str = json['password']
+        self.library: Library = Library(json['library'], True)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert object to dict"""

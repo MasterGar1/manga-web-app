@@ -35,9 +35,9 @@ def get_manga(manga_id: str) -> Manga:
     """Gets a manga by id"""
     manga_url: str = f'https://api.mangadex.org/manga/{manga_id}'
     response = make_request(manga_url)
-    return Manga(response.json_dict()['data'])
+    return Manga(response.json()['data'])
 
 def get_genres() -> list[str]:
     """Gets all available generes"""
-    tags: dict[str, Any] = make_request('https://api.mangadex.org/manga/tag').json_dict()
+    tags: dict[str, Any] = make_request('https://api.mangadex.org/manga/tag').json()
     return sorted([ tag['attributes']['name']['en'] for tag in tags['data'] ])

@@ -24,7 +24,7 @@ def load_users() -> list[User]:
 
 def save_user(user: User) -> None:
     """Save given user"""
-    with open(os.path.join('users', encrypt(user.username) + '.json_dict'),
+    with open(os.path.join('users', encrypt(user.username) + '.json'),
               'x', encoding='utf-8') as file:
         json_obj = json.dumps(user.to_dict())
         file.write(json_obj)
@@ -33,7 +33,7 @@ def get_user(name: str) -> User:
     """Get user by name"""
     enc_name: str = encrypt(name)
     dirs: list[str] = [ itm for itm in os.listdir('users')
-                        if itm.removesuffix('.json_dict') == enc_name ]
+                        if itm.removesuffix('.json') == enc_name ]
     if len(dirs) == 0:
         return None
     with open(os.path.join('users', dirs[0]), 'r', encoding='utf-8') as file:
@@ -42,7 +42,7 @@ def get_user(name: str) -> User:
 
 def delete_user(name: str) -> None:
     """Kill user"""
-    pth: str = os.path.join('users', encrypt(name) + '.json_dict')
+    pth: str = os.path.join('users', encrypt(name) + '.json')
     if os.path.exists(pth):
         os.remove(pth)
 
