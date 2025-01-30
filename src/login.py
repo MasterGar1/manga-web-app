@@ -1,5 +1,6 @@
 """Module with login templates."""
-from flask import render_template, redirect, url_for, session, request, flash, Blueprint
+from flask import render_template, redirect, url_for, \
+                    session, request, flash, Blueprint, get_flashed_messages
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .classes import User, Library
@@ -13,8 +14,8 @@ users : dict[str, str] = get_name_pass()
 def login():
     """Login page"""
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username: str = request.form['username']
+        password: str = request.form['password']
         if username in users and check_password_hash(users[username], password):
             session['username'] = username
             flash('Login successful!', 'success')
@@ -41,3 +42,10 @@ def signup():
             flash('Signup successful!', 'success')
             return redirect(url_for('auth.login'))
     return render_template('signup.html')
+
+@bp.route('/signout')
+def signout():
+    """Signout proxy"""
+    get_flashed_messages()
+    flash('Signed out!', 'success')
+    return redirect(url_for('auth.login'))
