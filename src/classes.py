@@ -51,9 +51,9 @@ class Manga:
             self.tags: list[str] = [ tag['attributes']['name']['en']
                                     for tag in info['attributes']['tags'] ]
             self.demographic: str = info['attributes']['publicationDemographic']
-            self.cover_art: str = [ el['id']
-                                   for el in info['relationships']
-                                   if el['type'] == 'cover_art' ][0]
+            [self.cover_art] = [ el['id']
+                                for el in info['relationships']
+                                if el['type'] == 'cover_art' ]
             self.last_chapter: tuple[str, str] = (info['attributes']['lastChapter'],
                                                   info['attributes']['lastVolume'])
 
@@ -98,11 +98,11 @@ class Manga:
 
 class Book(Manga):
     """Class implementation for a Book > Manga"""
-    def __init__(self, info: dict[str, Any], chapter: int = 0,
+    def __init__(self, info: dict[str, Any] | Manga, chapter: int = 0,
                  volume: int = 0, from_dict: bool = False) -> None:
         if from_dict:
-            self.chapter: int = info['current_chapter']
-            self.volume: int = info['current_volume']
+            self.chapter: int = info.get('current_chapter', 0)
+            self.volume: int = info.get('current_volume', 0)
         else:
             self.chapter: int = chapter
             self.volume: int = volume
@@ -124,7 +124,7 @@ class Book(Manga):
     @staticmethod
     def properties() -> list[str]:
         """Get property list"""
-        return ['id', 'title', 'demographic', 'last_chapter', 'current_chapter']
+        return ['id', 'title', 'last_chapter', 'current_chapter']
 
 class Library:
     """Class implementation for a book library"""
@@ -133,7 +133,7 @@ class Library:
             self.books: list[Book] = [ Book(bk, from_dict=True)
                                       for bk in mangas['books'] ]
         else:
-            self.books: list[Book] = [ Book(mgn, 0)
+            self.books: list[Book] = [ Book(mgn.to_dict(), from_dict=True)
                                       for mgn in mangas ]
 
     def get(self, key: str) -> Book:
@@ -165,10 +165,14 @@ class Library:
 
     def sort(self, prop: str, order: str) -> None:
         """Sort library"""
-        props: list[str] = Book.properties()
-        if property in props:
-            self.books.sort(key=lambda bk: bk.to_dict()[prop],
-                            reverse=order == 'desc')
+        ordir: bool = order == 'desc'
+        if prop in Book.properties():
+            if prop == 'last_chapter':
+                self.books.sort(key=lambda bk: float(bk.to_dict()[prop][0]), reverse=ordir)
+            elif prop == 'current_chapter':
+                self.books.sort(key=lambda bk: float(bk.to_dict()[prop]), reverse=ordir)
+            else:
+                self.books.sort(key=lambda bk: bk.to_dict()[prop], reverse=ordir)
 
     def filter(self, genre: str) -> None:
         """Filter library"""

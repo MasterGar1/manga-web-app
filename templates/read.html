@@ -19,5 +19,5 @@
         <a href="{{ url_for('user.read', manga=manga, chapter=next.id) }}">Next</a>
     {% endif %}
 </div>
-<a href="{{ url_for('user.manga_info', id=manga) }}">Back</a>
+<a href="{{ url_for('user.manga_info', manga_id=manga) }}">Back</a>
 {% endblock %}

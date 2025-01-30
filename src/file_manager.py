@@ -17,7 +17,7 @@ def load_users() -> list[User]:
         return []
     users: list[User] = []
     for itm in dirs:
-        with open(os.path.join('users', itm), 'r', encoding='utf-8') as file:
+        with open(os.path.join('users', encrypt(itm) + '.json'), 'r', encoding='utf-8') as file:
             usr: dict = json.load(file)
             users.append(User(usr))
     return users

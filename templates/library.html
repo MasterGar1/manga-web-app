@@ -43,10 +43,10 @@
     {% for manga in library %}
     <div class="manga-item" id="manga-{{ manga.id }}">
         <a href="{{ url_for('user.remove_proxy', manga_id=manga.id) }}" class="remove-btn">X</a>
-        <a href="{{ url_for('user.manga_info', id=manga.id) }}">
+        <a href="{{ url_for('user.manga_info', manga_id=manga.id) }}">
             <img src="{{ url_for('user.image_proxy', url=manga.cover()) }}" alt="{{ manga.title }} cover" class="manga-cover">
             <p>{{ manga.title }}</p>
-            <p>{{ manga.chapter }} / {{ manga.last_chapter }}</p>
+            <p>{{ manga.chapter }} / {{ manga.last_chapter[0] }}</p>
         </a>
     </div>
     {% endfor %}

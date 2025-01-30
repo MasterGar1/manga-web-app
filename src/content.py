@@ -14,8 +14,8 @@ def library(query: str):
     lib: Library = user.library
     if query != 'none':
         sort, ordir, gen = query.split('+')
-        lib.sort(sort, ordir)
         lib.filter(gen)
+        lib.sort(sort, ordir)
     genres: list[str] = ['Any'] + get_genres()
     return render_template('library.html', title='Library',
                            library=lib.books, order=Book.properties(),

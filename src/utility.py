@@ -22,10 +22,12 @@ def decrypt(input_string: str, key: int = 69) -> str:
 
 def split_words(text: str) -> str:
     """Splits a text by words"""
+    if text.count('_') > 0:
+        text = ''.join([ word.capitalize() for word in text.split('_') ])
     words: list[str] = []
-    last_word : int = 0
+    last_word: int = 0
     for i, ch in enumerate(text):
-        if ch.isupper():
+        if ch.isupper() and i != 0:
             words.append(text[last_word:i])
             last_word = i
     words.append(text[last_word:])
