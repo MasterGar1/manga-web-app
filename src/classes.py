@@ -153,7 +153,7 @@ class Library:
     def add(self, manga: Manga) -> None:
         """Add a new book"""
         if not self.has(manga):
-            self.books.append(Book(manga.to_dict()))
+            self.books.append(Book(manga.to_dict(), from_dict=True))
 
     def remove(self, manga: Manga) -> None:
         """Remove a book"""
