@@ -20,7 +20,7 @@ app.register_blueprint(ct.bp)
 def home():
     """Home Page"""
     if 'username' in session:
-        return render_template('index.html', username=session['username'])
+        return render_template('index.html', title='Home')
     return redirect(url_for('auth.login'))
 
 if __name__ == '__main__':
