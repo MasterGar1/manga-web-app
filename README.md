@@ -10,11 +10,21 @@ Manga reader app in python, using the [MangaDexAPI](https://api.mangadex.org/doc
     ```bash
     cd manga-web-app
     ```
-3. Install the required dependencies:
+3. Create a virtual environment:
+    ```bash
+    python -m venv .venv
+    ```
+
+4. Activate environment:
+    ```bash
+    .venv/Scripts/activate.bat
+    ```
+
+5. Install the required dependencies:
     ```bash
     pip install -r requirements.txt
     ```
-4.Run the app:
+6. Run the app:
     ```bash
     python main.py
     ```
