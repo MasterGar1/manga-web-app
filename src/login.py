@@ -14,8 +14,8 @@ users : dict[str, str] = get_name_pass()
 def login():
     """Login page"""
     if request.method == 'POST':
-        username: str = request.form['username']
-        password: str = request.form['password']
+        username = request.form['username']
+        password = request.form['password']
         if username in users and check_password_hash(users[username], password):
             session['username'] = username
             flash('Login successful!', 'success')
@@ -37,7 +37,7 @@ def signup():
             save_user(User({
                 'username' : username,
                 'password' : generate_password_hash(password),
-                'library' : Library([]).to_dict()
+                'library' : Library.from_list([]).to_dict()
             }))
             flash('Signup successful!', 'success')
             return redirect(url_for('auth.login'))

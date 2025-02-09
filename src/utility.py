@@ -51,7 +51,7 @@ def get_manga(manga_id: str) -> Manga:
     """Gets a manga by id"""
     manga_url: str = f'https://api.mangadex.org/manga/{manga_id}'
     response = make_request(manga_url)
-    return Manga(response.json()['data'])
+    return Manga.from_res(response.json()['data'])
 
 def get_genres() -> list[str]:
     """Gets all available generes"""

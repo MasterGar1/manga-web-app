@@ -35,27 +35,49 @@ class Chapter:
 
 class Manga:
     """Class implementation for manga"""
-    def __init__(self, info: dict[str, Any], from_dict: bool = False) -> None:
-        if from_dict:
-            self.id: str = info['id']
-            self.title: str = info['title']
-            self.description: str = info['description']
-            self.tags: list[str] = info['tags']
-            self.demographic: str = info['demographic']
-            self.cover_art: str = info['cover_art']
-            self.last_chapter: tuple[str, str] = (info['last_chapter'], info['last_volume'])
-        else:
-            self.id: str = info['id']
-            self.title: str = info['attributes']['title'].get('en', '.')
-            self.description: str = info['attributes']['description'].get('en', '.')
-            self.tags: list[str] = [ tag['attributes']['name']['en']
-                                    for tag in info['attributes']['tags'] ]
-            self.demographic: str = info['attributes']['publicationDemographic']
-            [self.cover_art] = [ el['id']
-                                for el in info['relationships']
-                                if el['type'] == 'cover_art' ]
-            self.last_chapter: tuple[str, str] = (info['attributes']['lastChapter'],
-                                                  info['attributes']['lastVolume'])
+    def __init__(self, **kwargs) -> None:
+        self.id: str = kwargs['id']
+        self.title: str = kwargs['title']
+        self.description: str = kwargs['description']
+        self.tags: list[str] = kwargs['tags']
+        self.demographic: str = kwargs['demographic']
+        self.cover_art: str = kwargs['cover_art']
+        self.last_chapter: tuple[str, str] = (kwargs['last_chapter'],
+                                              kwargs['last_volume'])
+
+    @classmethod
+    def from_dict(cls, info: dict[str, Any]):
+        """Creates a manga from dict"""
+        mid: str = info['id']
+        title: str = info['title']
+        desc: str = info['description']
+        tags: list[str] = info['tags']
+        demo: str = info['demographic']
+        cover: str = info['cover_art']
+        lc: tuple[str, str] = (info['last_chapter'], info['last_volume'])
+        return cls(id=mid, title=title, description=desc,
+                   tags=tags, demographic=demo,
+                   cover_art=cover, last_chapter=lc[0],
+                   last_volume=lc[1])
+
+    @classmethod
+    def from_res(cls, info: dict[str, Any]):
+        """Creates manga from response json"""
+        mid: str = info['id']
+        title: str = info['attributes']['title'].get('en', '.')
+        desc: str = info['attributes']['description'].get('en', '.')
+        tags: list[str] = [ tag['attributes']['name']['en']
+                                for tag in info['attributes']['tags'] ]
+        demo: str = info['attributes']['publicationDemographic']
+        [cover] = [ el['id']
+                            for el in info['relationships']
+                            if el['type'] == 'cover_art' ]
+        lc: tuple[str, str] = (info['attributes']['lastChapter'],
+                                                info['attributes']['lastVolume'])
+        return cls(id=mid, title=title, description=desc,
+                   tags=tags, demographic=demo,
+                   cover_art=cover, last_chapter=lc[0],
+                   last_volume=lc[1])
 
     def __repr__(self) -> str:
         return f'Title: {self.title}\nID: {self.id} \
@@ -98,15 +120,25 @@ class Manga:
 
 class Book(Manga):
     """Class implementation for a Book > Manga"""
-    def __init__(self, info: dict[str, Any] | Manga, chapter: int = 0,
-                 volume: int = 0, from_dict: bool = False) -> None:
-        if from_dict:
-            self.chapter: int = info.get('current_chapter', 0)
-            self.volume: int = info.get('current_volume', 0)
-        else:
-            self.chapter: int = chapter
-            self.volume: int = volume
-        super().__init__(info, from_dict)
+    def __init__(self, **kwargs) -> None:
+        self.chapter: int = kwargs['current_chapter']
+        self.volume: int = kwargs['current_volume']
+        super().__init__(id=kwargs['id'], title=kwargs['title'],
+                        description=kwargs['description'],
+                        tags=kwargs['tags'], demographic=kwargs['demographic'],
+                        cover_art=kwargs['cover_art'],
+                        last_chapter=kwargs['last_chapter'],
+                        last_volume=kwargs['last_volume'])
+
+    @classmethod
+    def from_dict(cls, info: dict[str, Any]):
+        """Crestes book from dict"""
+        return cls(**info)
+
+    @classmethod
+    def from_ints(cls, info: dict[str, Any], ch: int = 0, vl: int = 0):
+        """Creates book from dict and set chapter/volume"""
+        return cls(current_chapter=ch, current_volume=vl, **info)
 
     def __repr__(self):
         return super().__repr__() + f'Chaprers Read: {self.chapter}\n'
@@ -128,13 +160,22 @@ class Book(Manga):
 
 class Library:
     """Class implementation for a book library"""
-    def __init__(self, mangas: list[Manga] | dict[str, Any], from_dict: bool = False) -> None:
-        if from_dict:
-            self.books: list[Book] = [ Book(bk, from_dict=True)
-                                      for bk in mangas['books'] ]
-        else:
-            self.books: list[Book] = [ Book(mgn.to_dict(), from_dict=True)
-                                      for mgn in mangas ]
+    def __init__(self, mangas: list[Book]) -> None:
+        self.books = mangas
+
+    @classmethod
+    def from_list(cls, lst: list[Manga]):
+        """Creates library from list"""
+        books: list[Book] = [ Book.from_ints(mgn.to_dict())
+                                for mgn in lst ]
+        return cls(books)
+
+    @classmethod
+    def from_dict(cls, info: dict[str, Any]):
+        """Creates library from dict"""
+        books: list[Book] = [ Book.from_dict(bk)
+                                for bk in info['books'] ]
+        return cls(books)
 
     def get(self, key: str) -> Book:
         """Get book by key"""
@@ -153,7 +194,7 @@ class Library:
     def add(self, manga: Manga) -> None:
         """Add a new book"""
         if not self.has(manga):
-            self.books.append(Book(manga.to_dict(), from_dict=True))
+            self.books.append(Book.from_ints(manga.to_dict()))
 
     def remove(self, manga: Manga) -> None:
         """Remove a book"""
@@ -172,9 +213,7 @@ class Library:
         """Sort library"""
         ordir: bool = order == 'desc'
         if prop in Book.properties():
-            if prop == 'last_chapter':
-                self.books.sort(key=lambda bk: float(bk.to_dict()[prop][0]), reverse=ordir)
-            elif prop == 'current_chapter':
+            if prop in ['last_chapter', 'current_chapter']:
                 self.books.sort(key=lambda bk: float(bk.to_dict()[prop]), reverse=ordir)
             else:
                 self.books.sort(key=lambda bk: bk.to_dict()[prop], reverse=ordir)
@@ -190,7 +229,7 @@ class User:
     def __init__(self, json: dict[str, Any]) -> None:
         self.username: str = json['username']
         self.password: str = json['password']
-        self.library: Library = Library(json['library'], True)
+        self.library: Library = Library.from_dict(json['library'])
 
     def to_dict(self) -> dict[str, Any]:
         """Convert object to dict"""
@@ -203,8 +242,7 @@ class User:
     def update(self, manga: Manga, chapter: dict[str, Any]) -> None:
         """Update user"""
         self.library.set(manga.id,
-                         Book(manga.to_dict() | chapter,
-                              from_dict=True))
+                         Book.from_dict(manga.to_dict() | chapter))
 
 def make_request(url: str, params: dict[str, str] | None = None) -> Any:
     """Request maker"""

@@ -65,4 +65,4 @@ def search_manga(title: str, limit: int, **args) -> list[Manga]:
                             if fix_hyphon(tag['attributes']['name']['en'])
                             in args['excluded_tags'] ] }
     response = make_request(BASE_URL + ENDPOINT, params=params)
-    return [ mgn for m in response.json()['data'] if (mgn := Manga(m)).title != '.' ]
+    return [ mgn for m in response.json()['data'] if (mgn := Manga.from_res(m)).title != '.' ]

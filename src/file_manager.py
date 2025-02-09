@@ -1,6 +1,7 @@
 """Module to manage user account saving and loading."""
 import json
 import os
+from typing import Any
 
 from .classes import User, Manga
 from .utility import encrypt
@@ -34,8 +35,6 @@ def get_user(name: str) -> User:
     enc_name: str = encrypt(name)
     dirs: list[str] = [ itm for itm in os.listdir('users')
                         if itm.removesuffix('.json') == enc_name ]
-    if len(dirs) == 0:
-        return None
     with open(os.path.join('users', dirs[0]), 'r', encoding='utf-8') as file:
         usr: dict = json.load(file)
         return User(usr)
@@ -46,7 +45,7 @@ def delete_user(name: str) -> None:
     if os.path.exists(pth):
         os.remove(pth)
 
-def update_user(name: str, manga: Manga, chapter: int) -> None:
+def update_user(name: str, manga: Manga, chapter: dict[str, Any]) -> None:
     """Update user manga chapter"""
     user: User = get_user(name)
     user.update(manga, chapter)

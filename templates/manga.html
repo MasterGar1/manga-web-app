@@ -4,7 +4,6 @@
 {% endblock %}
 
 {% block body %}
-<h1>{{ title }}</h1>
 <div class="manga-details">
     <div class="manga-cover-wrapper">
         <img src="{{ url_for('user.image_proxy', url=manga.cover()) }}" alt="{{ title }} cover" class="manga-cover">
