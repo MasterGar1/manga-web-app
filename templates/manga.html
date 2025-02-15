@@ -19,7 +19,10 @@
         <div class="chapter-list">
             <h3>Chapters</h3>
             {% for chapter in manga.chapters() %}
-                <a href="{{ url_for('user.read', manga=manga.id, chapter=chapter.id) }}">Volume {{ chapter.volume }}, Chapter {{ chapter.number }}</a>
+                <a href="{{ url_for('user.read', manga=manga.id, chapter=chapter.id) }}">
+                    {% if chapter.volume is not none %}
+                        Volume {{ chapter.volume }},
+                    {% endif %} Chapter {{ chapter.number }}</a>
             {% endfor %}
         </div>
         {% if 'search' in request.referrer %}
